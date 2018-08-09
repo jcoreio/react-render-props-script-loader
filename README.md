@@ -5,10 +5,67 @@
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
-an easier to use dynamic script loader
+an easier to use dynamic script loader with a [render prop](https://reactjs.org/docs/render-props.html)
+
+## Version notes
+
+* supports React 15 or 16
+* if building for legacy browsers with a bundler like Webpack that supports the
+`module` field of `package.json`, you will probably need to add a rule to
+transpile this package.
 
 ## Installation
 
 ```sh
 npm install --save react-render-props-script-loader
 ```
+
+## Example
+
+```js
+import * as React from 'react'
+import ScriptLoader from 'react-render-props-script-loader'
+
+import MapView from './MapView'
+
+export const MapViewContainer = props => (
+  <ScriptLoader
+    type="text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"
+    onLoad={() => console.log('loaded google maps!')}
+    onError={error => console.error('failed to load google maps:', error.stack)}
+  >
+    {({loading, error}) => {
+      if (loading) return <h3>Loading Google Maps API...</h3>
+      if (error) return <h3>Failed to load Google Maps API: {error.message}</h3>
+      return <MapView {...props} />
+    }}
+  </ScriptLoader>
+)
+```
+
+## API
+
+The package exports a single component with the following props:
+
+### `src` (**required** `string`)
+
+The script source.
+
+### `onLoad` (`?() => any`)
+
+A callback that `ScriptLoader` will call once the script has been loaded
+
+### `onError` (`?(error: Error) => any`)
+
+A callback that `ScriptLoader` will call if there was an error loading the
+script
+
+### `children` (`?(state: State) => ?React.Node`)
+
+The render function.  It will be passed the following props, and may return
+the content to display:
+
+* `loading` (`boolean`) - `true` iff the script is loading
+* `loaded` (`boolean`) - `true` iff the script successfully loaded
+* `error` (`?Error`) - the `Error` that occurred if the script failed to load
