@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import loadScript, {getState} from './loadScript'
+import PropTypes from 'prop-types'
 
 export type State = {
   loading: boolean,
@@ -19,6 +20,13 @@ export type Props = {
 export default class ScriptLoader extends React.PureComponent<Props, State> {
   state = getState(this.props)
   promise: ?Promise<void>
+
+  static propTypes = {
+    src: PropTypes.string.isRequired,
+    onLoad: PropTypes.func,
+    onError: PropTypes.func,
+    children: PropTypes.func,
+  }
 
   load() {
     const {props} = this
