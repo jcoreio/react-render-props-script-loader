@@ -28,7 +28,7 @@ describe('ScriptLoader', () => {
       </ScriptLoader>
     )
     expect(comp.text()).to.equal('hello')
-    expect(render.args[0][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
       error: undefined,
@@ -37,7 +37,7 @@ describe('ScriptLoader', () => {
     if (!script) throw new Error('failed to get script');
     (script: any).onload()
     await promise
-    expect(render.args[1][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: false,
       loaded: true,
       error: null,
@@ -57,7 +57,7 @@ describe('ScriptLoader', () => {
       </ScriptLoader>
     )
     expect(comp.text()).to.equal('hello')
-    expect(render.args[0][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
       error: undefined,
@@ -66,7 +66,7 @@ describe('ScriptLoader', () => {
     if (!script) throw new Error('failed to get script');
     (script: any).onerror()
     await promise.catch(() => {})
-    const arg1 = render.args[1][0]
+    const arg1 = render.lastCall.lastArg
     expect(arg1.loading).to.be.false
     expect(arg1.loaded).to.be.false
     expect(arg1.error).to.be.an.instanceOf(Error)
@@ -89,7 +89,7 @@ describe('ScriptLoader', () => {
       </ScriptLoader>
     )
     expect(comp.text()).to.equal('hello')
-    expect(render.args[0][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
       error: undefined,
@@ -97,7 +97,7 @@ describe('ScriptLoader', () => {
     const script = document.getElementById('scriptId')
     if (script) throw new Error('duplicate script found')
     await promise.catch(() => {})
-    const arg1 = render.args[1][0]
+    const arg1 = render.lastCall.lastArg
     expect(arg1.loading).to.be.false
     expect(arg1.loaded).to.be.true
     expect(arg1.error).to.be.null
@@ -122,7 +122,7 @@ describe('ScriptLoader', () => {
         {render}
       </ScriptLoader>
     ).props).update()
-    expect(render.args[0][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
       error: undefined,
@@ -135,12 +135,7 @@ describe('ScriptLoader', () => {
     (script2: any).onload()
     await promise.catch(() => {})
     expect(oldOnLoad.called).to.be.false
-    expect(render.args[1][0]).to.deep.equal({
-      loading: true,
-      loaded: false,
-      error: undefined,
-    })
-    expect(render.args[2][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: false,
       loaded: true,
       error: null,
@@ -166,7 +161,7 @@ describe('ScriptLoader', () => {
         {render}
       </ScriptLoader>
     ).props).update()
-    expect(render.args[0][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
       error: undefined,
@@ -179,12 +174,7 @@ describe('ScriptLoader', () => {
     (script2: any).onload()
     await promise.catch(() => {})
     expect(oldOnError.called).to.be.false
-    expect(render.args[1][0]).to.deep.equal({
-      loading: true,
-      loaded: false,
-      error: undefined,
-    })
-    expect(render.args[2][0]).to.deep.equal({
+    expect(render.lastCall.lastArg).to.containSubset({
       loading: false,
       loaded: true,
       error: null,
