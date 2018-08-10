@@ -49,9 +49,11 @@
     "url": "https://github.com/jcoreio/react-render-props-script-loader.git"
   },
   "keywords": [
-    "es2015",
     "react",
-    "skeleton"
+    "script",
+    "loader",
+    "script-tag",
+    "dynamic-script"
   ],
   "author": "Andy Edwards",
   "license": "MIT",
