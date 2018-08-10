@@ -7,6 +7,14 @@
 
 an easier to use dynamic script loader with a [render prop](https://reactjs.org/docs/render-props.html)
 
+This is useful if you want to wait to load the Google Maps API until the user
+navigates to a view that uses it.  When you mount a `<ScriptLoader>` component,
+it will create the script tag you've requested.
+
+`<ScriptLoader>` doesn't load a given script URL more than once, even if there
+is a pre-existing `<script>` tag for that URL that it didn't create.  If `src`
+prop changes, it will load that new URL.
+
 ## Version notes
 
 * supports React 15 or 16
@@ -50,7 +58,7 @@ The package exports a single component with the following props:
 
 ### `src` (**required** `string`)
 
-The script source.
+The script URL.
 
 ### `onLoad` (`?() => any`)
 
@@ -63,8 +71,8 @@ script
 
 ### `children` (`?(state: State) => ?React.Node`)
 
-The render function.  It will be passed the following props, and may return
-the content to display:
+The render function.  It will be called with an object having the following
+props, and may return your desired content to display:
 
 * `loading` (`boolean`) - `true` iff the script is loading
 * `loaded` (`boolean`) - `true` iff the script successfully loaded
