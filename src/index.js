@@ -8,6 +8,7 @@ export type State = {
   loading: boolean,
   loaded: boolean,
   error: ?Error,
+  promise: ?Promise<any>,
 }
 
 export type Props = {

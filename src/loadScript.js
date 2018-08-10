@@ -39,11 +39,17 @@ export default (props: Props): Promise<any> =>
     }
   ))
 
-export function getState({src}: Props): {loading: boolean, loaded: boolean, error: ?Error} {
+export function getState({src}: Props): {
+  loading: boolean,
+  loaded: boolean,
+  error: ?Error,
+  promise: ?Promise<any>,
+} {
   const result = results[src]
   return {
     loading: result == null,
     loaded: result ? !result.error : false,
     error: result && result.error,
+    promise: promises[src],
   }
 }
