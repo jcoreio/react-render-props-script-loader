@@ -9,6 +9,7 @@ import {expect} from 'chai'
 import sinon from 'sinon'
 
 import ScriptLoader from '../src'
+import loadScript from '../src/loadScript'
 
 describe('ScriptLoader', () => {
   afterEach(() => {
@@ -213,5 +214,18 @@ describe('ScriptLoader', () => {
     (script: any).onerror(new Error())
     await new Promise(resolve => setTimeout(resolve, 100))
     expect(oldOnError.called).to.be.false
+  })
+})
+describe(`loadScript`, function () {
+  it(`errors if document is not defined`, async function (): Promise<void> {
+    const prevDocument = document
+    document = undefined // eslint-disable-line no-global-assign
+    try {
+      let error: ?Error
+      await loadScript({src: 'documentundefined'}).catch(err => error = err)
+      expect(error).to.exist
+    } finally {
+      document = prevDocument // eslint-disable-line no-global-assign
+    }
   })
 })
