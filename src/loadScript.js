@@ -13,7 +13,7 @@ const loadScript = ({ src, ...props }: Props): Promise<void> =>
       return
     }
     if (typeof document.querySelector === 'function') {
-      if (document.querySelector(`script[src="${encodeURIComponent(src)}"]`)) {
+      if (document.querySelector(`script[src="${src}"]`)) {
         resolve()
         return
       }
