@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from 'react'
-import loadScript, {getState} from './loadScript'
+import loadScript, { getState } from './loadScript'
 import PropTypes from 'prop-types'
 
 export type State = {
@@ -30,9 +30,10 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
   }
 
   load() {
-    const {props} = this
+    const { props } = this
     const {
-      onLoad, onError,
+      onLoad,
+      onError,
       children, // eslint-disable-line no-unused-vars
       ...loadProps
     } = props
@@ -67,8 +68,12 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
     this.promise = null
   }
 
-  render(): ?React.Node {
-    const {children} = this.props
-    if (children) return children({...this.state})
+  render(): React.Node | null {
+    const { children } = this.props
+    if (children) {
+      const result = children({ ...this.state })
+      return result == null ? null : result
+    }
+    return null
   }
 }

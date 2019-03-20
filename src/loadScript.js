@@ -6,8 +6,8 @@ type Props = {
   src: string,
 }
 
-const loadScript = ({src, ...props}: Props): Promise<void> => new Promise(
-  (resolve: () => void, reject: (error?: Error) => void) => {
+const loadScript = ({ src, ...props }: Props): Promise<void> =>
+  new Promise((resolve: () => void, reject: (error?: Error) => void) => {
     if (typeof document === 'undefined') {
       reject(new Error('server-side rendering is not supported'))
       return
@@ -24,22 +24,24 @@ const loadScript = ({src, ...props}: Props): Promise<void> => new Promise(
     script.onload = resolve
     script.onerror = reject
     if (document.body) document.body.appendChild(script)
-  }
-)
+  })
 
-const results: {[src: string]: {error: ?Error}} = {}
-const promises: {[src: string]: Promise<any>} = {}
+const results: { [src: string]: { error: ?Error } } = {}
+const promises: { [src: string]: Promise<any> } = {}
 
 export default (props: Props): Promise<any> =>
-  promises[props.src] || (promises[props.src] = loadScript(props).then(
-    () => results[props.src] = {error: null},
+  promises[props.src] ||
+  (promises[props.src] = loadScript(props).then(
+    () => (results[props.src] = { error: null }),
     (error: any = new Error(`failed to load ${props.src}`)) => {
-      results[props.src] = {error}
+      results[props.src] = { error }
       throw error
     }
   ))
 
-export function getState({src}: Props): {
+export function getState({
+  src,
+}: Props): {
   loading: boolean,
   loaded: boolean,
   error: ?Error,
