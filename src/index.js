@@ -13,7 +13,6 @@ export type State = {
 
 export type Props = {
   src: string,
-  type?: ?string,
   onLoad?: ?() => any,
   onError?: ?(error: Error) => any,
   children?: ?(state: State) => ?React.Node,
@@ -74,12 +73,19 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
   }
 
   render(): React.Node {
-    const { children, type, src } = this.props
+    const {
+      children,
+      /* eslint-disable no-unused-vars */
+      onLoad,
+      onError,
+      /* eslint-enable no-unsued-vars */
+      ...props
+    } = this.props
     return (
       <ScriptsRegistryContext.Consumer>
         {(context: ?ScriptsRegistry) => {
           if (context) {
-            context.scripts.push({ type, src })
+            context.scripts.push(props)
             if (!children) return <React.Fragment />
             const result = children({
               loading: true,
@@ -102,15 +108,14 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
 
 export class ScriptsRegistry {
   scripts: Array<{
-    type?: ?string,
     src: string,
   }> = []
 
   scriptTags(): React.Node {
     return (
       <React.Fragment>
-        {this.scripts.map(({ type, src }, index) => (
-          <script key={index} type={type} src={src} />
+        {this.scripts.map((props, index) => (
+          <script key={index} {...props} />
         ))}
       </React.Fragment>
     )
