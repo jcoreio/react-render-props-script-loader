@@ -91,8 +91,8 @@ describe('ScriptLoader', () => {
     )
     expect(comp.text()).to.equal('hello')
     expect(render.lastCall.lastArg).to.containSubset({
-      loading: true,
-      loaded: false,
+      loading: false,
+      loaded: true,
       error: undefined,
     })
     const script = document.getElementById('scriptId')
@@ -252,20 +252,26 @@ describe(`SSR`, function() {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     const registry = new ScriptsRegistry()
-    mount(
+    const comp = mount(
       <ScriptsRegistryContext.Provider value={registry}>
-        <ScriptLoader src="foo" id="scriptId">
+        <ScriptLoader src="SSR" id="scriptId">
           {render}
         </ScriptLoader>
       </ScriptsRegistryContext.Provider>
     )
-    const comp = mount(registry.scriptTags())
-
     expect(render.lastCall.lastArg).to.containSubset({
-      loading: true,
-      loaded: false,
-      error: null,
+      loading: false,
+      loaded: true,
+      error: undefined,
     })
-    expect(comp.find('script').prop('src')).to.equal('foo')
+    expect(comp.text()).to.equal('hello')
+
+    const head = mount(
+      <head>
+        <meta key={0} />
+        {registry.scriptTags()}
+      </head>
+    )
+    expect(head.find('script').prop('src')).to.equal('SSR')
   })
 })

@@ -18,13 +18,30 @@ export type Props = {
   children?: ?(state: State) => ?React.Node,
 }
 
+export type InnerProps = Props & {
+  scriptsRegistry?: ?ScriptsRegistry,
+}
+
+export class ScriptsRegistry {
+  scripts: Array<{
+    src: string,
+  }> = []
+  results: { [src: string]: { error: ?Error } } = {}
+  promises: { [src: string]: Promise<any> } = {}
+
+  scriptTags(): React.Node {
+    return this.scripts.map(props => <script key={props.src} {...props} />)
+  }
+}
+
 export const ScriptsRegistryContext: React.Context<?ScriptsRegistry> = React.createContext(
   null
 )
 
-export default class ScriptLoader extends React.PureComponent<Props, State> {
+class ScriptLoader extends React.PureComponent<InnerProps, State> {
+  mounted: boolean = false
+  promise: Promise<void> = loadScript(this.props)
   state = getState(this.props)
-  promise: ?Promise<void>
 
   static propTypes = {
     src: PropTypes.string.isRequired,
@@ -33,91 +50,56 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
     children: PropTypes.func,
   }
 
-  load() {
-    const { props } = this
-    const {
-      onLoad,
-      onError,
-      children, // eslint-disable-line no-unused-vars
-      ...loadProps
-    } = props
-    const promise = loadScript(loadProps)
-    if (this.promise !== promise) {
-      this.promise = promise
-      this.setState(getState(props))
-      promise.then(
-        () => {
-          if (this.promise !== promise) return
-          if (onLoad) onLoad()
-          this.setState(getState(props))
-        },
-        (error: Error) => {
-          if (this.promise !== promise) return
-          if (onError) onError(error)
-          this.setState(getState(props))
-        }
-      )
-    }
-  }
-
   componentDidMount() {
-    this.load()
-  }
-
-  componentDidUpdate() {
-    this.load()
+    this.mounted = true
+    this.listenTo(this.promise)
   }
 
   componentWillUnmount() {
-    this.promise = null
+    this.mounted = false
+  }
+
+  componentDidUpdate() {
+    const promise = loadScript(this.props)
+    if (this.promise !== promise) {
+      this.setState(getState(this.props))
+      this.promise = promise
+      this.listenTo(promise)
+    }
+  }
+
+  listenTo(promise: Promise<any>) {
+    const { props } = this
+    const { onLoad, onError } = props
+    promise.then(
+      () => {
+        if (!this.mounted || this.promise !== promise) return
+        if (onLoad) onLoad()
+        this.setState(getState(props))
+      },
+      (error: Error) => {
+        if (!this.mounted || this.promise !== promise) return
+        if (onError) onError(error)
+        this.setState(getState(props))
+      }
+    )
   }
 
   render(): React.Node {
-    const {
-      children,
-      /* eslint-disable no-unused-vars */
-      onLoad,
-      onError,
-      /* eslint-enable no-unsued-vars */
-      ...props
-    } = this.props
-    return (
-      <ScriptsRegistryContext.Consumer>
-        {(context: ?ScriptsRegistry) => {
-          if (context) {
-            context.scripts.push(props)
-            if (!children) return <React.Fragment />
-            const result = children({
-              loading: true,
-              loaded: false,
-              error: null,
-              promise: new Promise(() => {}),
-            })
-            return result == null ? null : result
-          }
-          if (children) {
-            const result = children({ ...this.state })
-            return result == null ? null : result
-          }
-          return null
-        }}
-      </ScriptsRegistryContext.Consumer>
-    )
+    const { children } = this.props
+    if (children) {
+      const result = children({ ...this.state })
+      return result == null ? null : result
+    }
+    return null
   }
 }
 
-export class ScriptsRegistry {
-  scripts: Array<{
-    src: string,
-  }> = []
-
-  scriptTags(): React.Node {
-    return (
-      <React.Fragment>
-        {this.scripts.map((props, index) => (
-          <script key={index} {...props} />
-        ))}
-      </React.Fragment>
-    )
-  }
-}
+const ConnectedScriptsLoader = (props: Props) => (
+  <ScriptsRegistryContext.Consumer>
+    {scriptsRegistry => (
+      <ScriptLoader {...props} scriptsRegistry={scriptsRegistry} />
+    )}
+  </ScriptsRegistryContext.Consumer>
+)
+export default ConnectedScriptsLoader
