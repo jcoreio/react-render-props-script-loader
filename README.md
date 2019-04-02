@@ -15,20 +15,20 @@ it will create the script tag you've requested.
 is a pre-existing `<script>` tag for that URL that it didn't create. If `src`
 prop changes, it will load that new URL.
 
-## Version notes
+# Version notes
 
 - supports React 15 or 16
 - if building for legacy browsers with a bundler like Webpack that supports the
   `module` field of `package.json`, you will probably need to add a rule to
   transpile this package.
 
-## Installation
+# Installation
 
 ```sh
 npm install --save react-render-props-script-loader
 ```
 
-## Example
+# Example
 
 ```js
 import * as React from 'react'
@@ -52,9 +52,13 @@ export const MapViewContainer = props => (
 )
 ```
 
-## API
+# API
 
-The package exports a single component with the following props:
+## `ScriptLoader`
+
+```js
+import ScriptLoader from 'react-render-props-script-loader'
+```
 
 ### `src` (**required** `string`)
 
@@ -73,3 +77,48 @@ script
 
 The render function. It will be called with an object having the following
 props, and may return your desired content to display:
+
+```js
+{
+  loading: boolean,
+  loaded: boolean,
+  error: ?Error,
+  promise: ?Promise<any>,
+}
+```
+
+## Server-Side Rendering
+
+```js
+import {
+  ScriptsRegistry,
+  ScriptsRegistryContext,
+} from 'react-render-props-script-loader'
+```
+
+On the server, create an instance of `ScriptsRegistry` and put it on the app's
+context:
+
+```js
+const registry = new ScriptsRegistry()
+
+const body = ReactDOM.renderToString(
+  <ScriptsRegistryContext.Provider value={registry}>
+    <App />
+  </ScriptsRegistryContext.Provider>
+)
+```
+
+Then render `registry.scriptTags()` in your head element:
+
+```js
+const html = (
+  <html className="default">
+    <head>
+      ...
+      {registry.scriptTags()}
+    </head>
+    ...
+  </html>
+)
+```

@@ -2,13 +2,13 @@
 
 /* eslint-env browser */
 
-import { describe, it } from 'mocha'
+import { describe, it, afterEach } from 'mocha'
 import * as React from 'react'
 import { mount } from 'enzyme'
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import ScriptLoader from '../src'
+import ScriptLoader, { ScriptsRegistryContext, ScriptsRegistry } from '../src'
 import loadScript from '../src/loadScript'
 
 describe('ScriptLoader', () => {
@@ -245,5 +245,27 @@ describe(`loadScript`, function() {
     } finally {
       document = prevDocument // eslint-disable-line no-global-assign
     }
+  })
+})
+describe(`SSR`, function() {
+  it(`works`, function() {
+    this.timeout(10000)
+    const render = sinon.spy(() => 'hello')
+    const registry = new ScriptsRegistry()
+    mount(
+      <ScriptsRegistryContext.Provider value={registry}>
+        <ScriptLoader src="foo" id="scriptId">
+          {render}
+        </ScriptLoader>
+      </ScriptsRegistryContext.Provider>
+    )
+    const comp = mount(registry.scriptTags())
+
+    expect(render.lastCall.lastArg).to.containSubset({
+      loading: true,
+      loaded: false,
+      error: null,
+    })
+    expect(comp.find('script').prop('src')).to.equal('foo')
   })
 })

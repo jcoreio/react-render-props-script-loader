@@ -13,10 +13,15 @@ export type State = {
 
 export type Props = {
   src: string,
+  type?: ?string,
   onLoad?: ?() => any,
   onError?: ?(error: Error) => any,
   children?: ?(state: State) => ?React.Node,
 }
+
+export const ScriptsRegistryContext: React.Context<?ScriptsRegistry> = React.createContext(
+  null
+)
 
 export default class ScriptLoader extends React.PureComponent<Props, State> {
   state = getState(this.props)
@@ -68,12 +73,46 @@ export default class ScriptLoader extends React.PureComponent<Props, State> {
     this.promise = null
   }
 
-  render(): React.Node | null {
-    const { children } = this.props
-    if (children) {
-      const result = children({ ...this.state })
-      return result == null ? null : result
-    }
-    return null
+  render(): React.Node {
+    const { children, type, src } = this.props
+    return (
+      <ScriptsRegistryContext.Consumer>
+        {(context: ?ScriptsRegistry) => {
+          if (context) {
+            context.scripts.push({ type, src })
+            if (!children) return <React.Fragment />
+            const result = children({
+              loading: true,
+              loaded: false,
+              error: null,
+              promise: new Promise(() => {}),
+            })
+            return result == null ? null : result
+          }
+          if (children) {
+            const result = children({ ...this.state })
+            return result == null ? null : result
+          }
+          return null
+        }}
+      </ScriptsRegistryContext.Consumer>
+    )
+  }
+}
+
+export class ScriptsRegistry {
+  scripts: Array<{
+    type?: ?string,
+    src: string,
+  }> = []
+
+  scriptTags(): React.Node {
+    return (
+      <React.Fragment>
+        {this.scripts.map(({ type, src }, index) => (
+          <script key={index} type={type} src={src} />
+        ))}
+      </React.Fragment>
+    )
   }
 }
