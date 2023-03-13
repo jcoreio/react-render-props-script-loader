@@ -6,6 +6,7 @@
 <PROJECT_ROOT>/node_modules/.*/fbjs/.*
 <PROJECT_ROOT>/node_modules/fbjs/.*
 <PROJECT_ROOT>/node_modules/.*/config-chain/.*
+<PROJECT_ROOT>/node_modules/.*/resolve/.*
 
 [include]
 ./src
@@ -14,6 +15,3 @@
 [libs]
 
 [options]
-module.system=node
-esproposal.class_static_fields=enable
-esproposal.class_instance_fields=enable

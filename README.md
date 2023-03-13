@@ -36,12 +36,14 @@ import ScriptLoader from 'react-render-props-script-loader'
 
 import MapView from './MapView'
 
-export const MapViewContainer = props => (
+export const MapViewContainer = (props) => (
   <ScriptLoader
     type="text/javascript"
     src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places"
     onLoad={() => console.log('loaded google maps!')}
-    onError={error => console.error('failed to load google maps:', error.stack)}
+    onError={(error) =>
+      console.error('failed to load google maps:', error.stack)
+    }
   >
     {({ loading, error }) => {
       if (loading) return <h3>Loading Google Maps API...</h3>
@@ -128,7 +130,7 @@ const html = (
 Make sure your header includes this meta tag:
 
 ```jsx
-  <meta property="csp-nonce" content={nonce} />
+<meta property="csp-nonce" content={nonce} />
 ```
 
 And in SSR, pass the `nonce` to `registry.scriptTags({ nonce })`.

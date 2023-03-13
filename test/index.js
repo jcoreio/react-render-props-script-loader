@@ -13,9 +13,9 @@ import loadScript from '../src/loadScript'
 
 describe('ScriptLoader', () => {
   afterEach(() => {
-    document.querySelectorAll('script').forEach(script => script.remove())
+    document.querySelectorAll('script').forEach((script) => script.remove())
   })
-  it('load works', async function() {
+  it('load works', async function () {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     let onLoad, onError
@@ -44,7 +44,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it('error works', async function() {
+  it('error works', async function () {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     let onLoad, onError
@@ -72,7 +72,7 @@ describe('ScriptLoader', () => {
     expect(arg1.loaded).to.be.false
     expect(arg1.error).to.be.an.instanceOf(Error)
   })
-  it(`doesn't create a duplicate script`, async function() {
+  it(`doesn't create a duplicate script`, async function () {
     this.timeout(10000)
     const preexisting = document.createElement('script')
     preexisting.src = 'baz'
@@ -103,7 +103,7 @@ describe('ScriptLoader', () => {
     expect(arg1.loaded).to.be.true
     expect(arg1.error).to.be.null
   })
-  it(`doesn't call onLoad after src changes`, async function() {
+  it(`doesn't call onLoad after src changes`, async function () {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -119,18 +119,13 @@ describe('ScriptLoader', () => {
       </ScriptLoader>
     )
     comp
-      .setProps(
-        (
-          <ScriptLoader
-            src="qlomb"
-            id="scriptId2"
-            onLoad={onLoad}
-            onError={onError}
-          >
-            {render}
-          </ScriptLoader>
-        ).props
-      )
+      .setProps({
+        src: 'qlomb',
+        id: 'scriptId2',
+        onLoad,
+        onError,
+        children: render,
+      })
       .update()
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
@@ -151,7 +146,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it(`doesn't call onError after src changes`, async function() {
+  it(`doesn't call onError after src changes`, async function () {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -167,18 +162,13 @@ describe('ScriptLoader', () => {
       </ScriptLoader>
     )
     comp
-      .setProps(
-        (
-          <ScriptLoader
-            src="qlombage"
-            id="scriptId2"
-            onLoad={onLoad}
-            onError={onError}
-          >
-            {render}
-          </ScriptLoader>
-        ).props
-      )
+      .setProps({
+        src: 'qlombage',
+        id: 'scriptId2',
+        onLoad,
+        onError,
+        children: render,
+      })
       .update()
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
@@ -199,7 +189,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it(`doesn't call onLoad after unmount`, async function() {
+  it(`doesn't call onLoad after unmount`, async function () {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -213,10 +203,10 @@ describe('ScriptLoader', () => {
     const script = document.getElementById('scriptId')
     if (!script) throw new Error('missing script')
     ;(script: any).onload()
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100))
     expect(oldOnLoad.called).to.be.false
   })
-  it(`doesn't call onError after unmount`, async function() {
+  it(`doesn't call onError after unmount`, async function () {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -230,25 +220,27 @@ describe('ScriptLoader', () => {
     const script = document.getElementById('scriptId')
     if (!script) throw new Error('missing script')
     ;(script: any).onerror(new Error())
-    await new Promise(resolve => setTimeout(resolve, 100))
+    await new Promise((resolve) => setTimeout(resolve, 100))
     expect(oldOnError.called).to.be.false
   })
 })
-describe(`loadScript`, function() {
-  it(`errors if document is not defined`, async function() {
+describe(`loadScript`, function () {
+  it(`errors if document is not defined`, async function () {
     const prevDocument = document
     document = undefined // eslint-disable-line no-global-assign
     try {
       let error: ?Error
-      await loadScript({ src: 'documentundefined' }).catch(err => (error = err))
+      await loadScript({ src: 'documentundefined' }).catch(
+        (err) => (error = err)
+      )
       expect(error).to.exist
     } finally {
       document = prevDocument // eslint-disable-line no-global-assign
     }
   })
 })
-describe(`SSR`, function() {
-  it(`works`, function() {
+describe(`SSR`, function () {
+  it(`works`, function () {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     const registry = new ScriptsRegistry()

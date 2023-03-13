@@ -4,50 +4,50 @@ import * as React from 'react'
 import loadScript, { getState } from './loadScript'
 import PropTypes from 'prop-types'
 
-export type State = {
+export type State = {|
   loading: boolean,
   loaded: boolean,
   error: ?Error,
   promise: ?Promise<any>,
-}
+|}
 
 export type Props = {
   src: string,
   onLoad?: ?() => any,
   onError?: ?(error: Error) => any,
   children?: ?(state: State) => ?React.Node,
+  ...
 }
 
-export type InnerProps = Props & {
+export type InnerProps = {
+  ...$Exact<Props>,
   scriptsRegistry?: ?ScriptsRegistry,
+  ...
 }
 
 export class ScriptsRegistry {
-  scripts: Array<{
-    src: string,
-  }> = []
+  scripts: Array<{ src: string, ... }> = []
   results: { [src: string]: { error: ?Error } } = {}
   promises: { [src: string]: Promise<any> } = {}
 
   scriptTags(options?: {| nonce?: string |}): React.Node {
-    return this.scripts.map(props => (
+    return this.scripts.map((props) => (
       <script
+        {...props}
         key={props.src}
         nonce={options ? options.nonce : undefined}
-        {...props}
       />
     ))
   }
 }
 
-export const ScriptsRegistryContext: React.Context<?ScriptsRegistry> = React.createContext(
-  null
-)
+export const ScriptsRegistryContext: React.Context<?ScriptsRegistry> =
+  React.createContext(null)
 
 class ScriptLoader extends React.PureComponent<InnerProps, State> {
   mounted: boolean = false
   promise: Promise<void> = loadScript(this.props)
-  state = getState(this.props)
+  state: State = getState(this.props)
 
   static propTypes = {
     src: PropTypes.string.isRequired,
@@ -101,9 +101,9 @@ class ScriptLoader extends React.PureComponent<InnerProps, State> {
   }
 }
 
-const ConnectedScriptsLoader = (props: Props) => (
+const ConnectedScriptsLoader: React.ComponentType<Props> = (props: Props) => (
   <ScriptsRegistryContext.Consumer>
-    {scriptsRegistry => (
+    {(scriptsRegistry) => (
       <ScriptLoader {...props} scriptsRegistry={scriptsRegistry} />
     )}
   </ScriptsRegistryContext.Consumer>

@@ -2,15 +2,15 @@
 /* eslint-env browser */
 import { type InnerProps } from './index'
 
-let nonce
-function getNonce(): string | void {
+let nonce: ?string
+function getNonce(): string | null {
   if (nonce === undefined) {
     const node = document.querySelector(
       'meta[property="csp-nonce"], meta[name="csp-nonce"]'
     )
     nonce = node ? node.getAttribute('content') ?? null : null
   }
-  return nonce
+  return nonce ?? null
 }
 
 const loadScript = async ({
@@ -31,7 +31,7 @@ const loadScript = async ({
       'you must pass a scriptsRegistry if calling on the server side'
     )
   }
-  if (typeof document.querySelector === 'function') {
+  if (typeof (document: any).querySelector === 'function') {
     if (document.querySelector(`script[src="${src}"]`)) {
       results[src] = { error: undefined }
       return
@@ -40,8 +40,8 @@ const loadScript = async ({
   return new Promise((resolve: () => void, reject: (error?: Error) => void) => {
     const script = document.createElement('script')
     script.src = src
-    script.nonce = getNonce()
-    Object.keys(props).forEach(key => script.setAttribute(key, props[key]))
+    ;(script: any).nonce = getNonce()
+    Object.keys(props).forEach((key) => script.setAttribute(key, props[key]))
     script.onload = resolve
     script.onerror = reject
     if (document.body) document.body.appendChild(script)
@@ -67,15 +67,12 @@ export default (props: InnerProps): Promise<any> => {
   )
 }
 
-export function getState({
-  src,
-  scriptsRegistry,
-}: InnerProps): {
+export function getState({ src, scriptsRegistry }: InnerProps): {|
   loading: boolean,
   loaded: boolean,
   error: ?Error,
   promise: ?Promise<any>,
-} {
+|} {
   const result = scriptsRegistry ? scriptsRegistry.results[src] : results[src]
   const promise = scriptsRegistry
     ? scriptsRegistry.promises[src]
