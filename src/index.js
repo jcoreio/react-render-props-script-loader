@@ -29,8 +29,8 @@ export class ScriptsRegistry {
   results: { [src: string]: { error: ?Error } } = {}
   promises: { [src: string]: Promise<any> } = {}
 
-  scriptTags(): React.Node {
-    return this.scripts.map(props => <script key={props.src} {...props} />)
+  scriptTags(options?: {| nonce?: string |}): React.Node {
+    return this.scripts.map(props => <script key={props.src} nonce={options ? options.nonce : undefined} {...props} />)
   }
 }
 

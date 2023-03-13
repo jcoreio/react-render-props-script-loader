@@ -2,6 +2,15 @@
 /* eslint-env browser */
 import { type InnerProps } from './index'
 
+let nonce
+function getNonce(): string | void {
+  if (nonce === undefined) {
+    const node = document.querySelector('meta[property="csp-nonce"], meta[name="csp-nonce"]')
+    nonce = node ? node.getAttribute('content') ?? null : null
+  }
+  return nonce
+}
+
 const loadScript = async ({
   scriptsRegistry,
   onLoad,
@@ -29,6 +38,7 @@ const loadScript = async ({
   return new Promise((resolve: () => void, reject: (error?: Error) => void) => {
     const script = document.createElement('script')
     script.src = src
+    script.nonce = getNonce()
     Object.keys(props).forEach(key => script.setAttribute(key, props[key]))
     script.onload = resolve
     script.onerror = reject

@@ -122,3 +122,13 @@ const html = (
   </html>
 )
 ```
+
+## Content Security Policy
+
+Make sure your header includes this meta tag:
+
+```jsx
+  <meta property="csp-nonce" content={nonce} />
+```
+
+And in SSR, pass the `nonce` to `registry.scriptTags({ nonce })`.
