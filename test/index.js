@@ -15,7 +15,7 @@ describe('ScriptLoader', () => {
   afterEach(() => {
     document.querySelectorAll('script').forEach(script => script.remove())
   })
-  it('load works', async function(): Promise<void> {
+  it('load works', async function() {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     let onLoad, onError
@@ -44,7 +44,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it('error works', async function(): Promise<void> {
+  it('error works', async function() {
     this.timeout(10000)
     const render = sinon.spy(() => 'hello')
     let onLoad, onError
@@ -72,7 +72,7 @@ describe('ScriptLoader', () => {
     expect(arg1.loaded).to.be.false
     expect(arg1.error).to.be.an.instanceOf(Error)
   })
-  it(`doesn't create a duplicate script`, async function(): Promise<void> {
+  it(`doesn't create a duplicate script`, async function() {
     this.timeout(10000)
     const preexisting = document.createElement('script')
     preexisting.src = 'baz'
@@ -103,7 +103,7 @@ describe('ScriptLoader', () => {
     expect(arg1.loaded).to.be.true
     expect(arg1.error).to.be.null
   })
-  it(`doesn't call onLoad after src changes`, async function(): Promise<void> {
+  it(`doesn't call onLoad after src changes`, async function() {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -151,7 +151,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it(`doesn't call onError after src changes`, async function(): Promise<void> {
+  it(`doesn't call onError after src changes`, async function() {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -199,7 +199,7 @@ describe('ScriptLoader', () => {
       error: null,
     })
   })
-  it(`doesn't call onLoad after unmount`, async function(): Promise<void> {
+  it(`doesn't call onLoad after unmount`, async function() {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -216,7 +216,7 @@ describe('ScriptLoader', () => {
     await new Promise(resolve => setTimeout(resolve, 100))
     expect(oldOnLoad.called).to.be.false
   })
-  it(`doesn't call onError after unmount`, async function(): Promise<void> {
+  it(`doesn't call onError after unmount`, async function() {
     this.timeout(10000)
 
     const render = sinon.spy(() => 'hello')
@@ -235,7 +235,7 @@ describe('ScriptLoader', () => {
   })
 })
 describe(`loadScript`, function() {
-  it(`errors if document is not defined`, async function(): Promise<void> {
+  it(`errors if document is not defined`, async function() {
     const prevDocument = document
     document = undefined // eslint-disable-line no-global-assign
     try {

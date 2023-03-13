@@ -5,7 +5,9 @@ import { type InnerProps } from './index'
 let nonce
 function getNonce(): string | void {
   if (nonce === undefined) {
-    const node = document.querySelector('meta[property="csp-nonce"], meta[name="csp-nonce"]')
+    const node = document.querySelector(
+      'meta[property="csp-nonce"], meta[name="csp-nonce"]'
+    )
     nonce = node ? node.getAttribute('content') ?? null : null
   }
   return nonce
