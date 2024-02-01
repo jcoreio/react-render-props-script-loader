@@ -43,12 +43,10 @@
     "@testing-library/react": "^14.2.0",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
-    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.3",
     "chai": "^4.3.7",
     "chai-subset": "^1.6.0",
     "copy": "^0.3.2",
     "cross-env": "^7.0.3",
-    "enzyme": "^3.11.0",
     "eslint": "^8.43.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-flowtype": "^8.0.3",
@@ -68,7 +66,7 @@
     "prop-types": "^15.7.2"
   },
   "peerDependencies": {
-    "react": "^15.0.0 || ^16.0.0 || ^17.0.0"
+    "react": "^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
