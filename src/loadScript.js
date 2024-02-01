@@ -18,6 +18,8 @@ const loadScript = async ({
   onLoad,
   onError,
   children,
+  // eslint-disable-next-line no-unused-vars
+  act,
   ...props
 }: InnerProps): Promise<void> => {
   const { src } = props

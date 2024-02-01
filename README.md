@@ -6,6 +6,7 @@
 [![npm version](https://badge.fury.io/js/react-library-skeleton.svg)](https://badge.fury.io/js/react-library-skeleton)
 
 an easier to use dynamic script loader with a [render prop](https://reactjs.org/docs/render-props.html)
+and now a React custom hook.
 
 This is useful if you want to wait to load the Google Maps API until the user
 navigates to a view that uses it. When you mount a `<ScriptLoader>` component,
@@ -17,7 +18,6 @@ prop changes, it will load that new URL.
 
 # Version notes
 
-- supports React 15 or 16
 - if building for legacy browsers with a bundler like Webpack that supports the
   `module` field of `package.json`, you will probably need to add a rule to
   transpile this package.
@@ -55,6 +55,38 @@ export const MapViewContainer = (props) => (
 ```
 
 # API
+
+## `useScript(props: Props)`
+
+```js
+import { useScript } from 'react-render-props-script-loader'
+```
+
+### `props.src` (**required** `string`)
+
+The script URL.
+
+### `props.onLoad` (`?() => any`)
+
+A callback that `ScriptLoader` will call once the script has been loaded
+
+### `props.onError` (`?(error: Error) => any`)
+
+A callback that `ScriptLoader` will call if there was an error loading the
+script
+
+### Returns
+
+A state object of the following type:
+
+```ts
+type State = {
+  loading: boolean
+  loaded: boolean
+  error: ?Error
+  promise: ?Promise<any>
+}
+```
 
 ## `ScriptLoader`
 

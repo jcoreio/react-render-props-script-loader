@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import loadScript, { getState } from './loadScript'
-import PropTypes from 'prop-types'
 
 export type State = {|
   loading: boolean,
@@ -16,6 +15,7 @@ export type Props = {
   onLoad?: ?() => any,
   onError?: ?(error: Error) => any,
   children?: ?(state: State) => ?React.Node,
+  act?: ?(action: () => void) => void,
   ...
 }
 
@@ -23,6 +23,52 @@ export type InnerProps = {
   ...$Exact<Props>,
   scriptsRegistry?: ?ScriptsRegistry,
   ...
+}
+
+export function useScript(props: Props): State {
+  const isMounted = React.useRef(true)
+  React.useEffect(
+    () => () => {
+      isMounted.current = false
+    },
+    []
+  )
+
+  const scriptsRegistry = React.useContext(ScriptsRegistryContext)
+
+  const [, rerender] = React.useReducer((count = 0) => count + 1)
+  const propsRef = React.useRef(props)
+  propsRef.current = props
+
+  const act = React.useCallback((fn: () => void) => {
+    if (!isMounted.current) return
+    const { act } = propsRef.current
+    if (act) act(fn)
+    else fn()
+  }, [])
+
+  const promise = React.useMemo(
+    () => loadScript({ ...props, scriptsRegistry }),
+    [props.src, scriptsRegistry]
+  )
+
+  React.useEffect(() => {
+    if (!isMounted.current) return
+    promise.then(
+      () =>
+        act(() => {
+          propsRef.current.onLoad?.()
+          rerender()
+        }),
+      (error: Error) =>
+        act(() => {
+          propsRef.current.onError?.(error)
+          rerender()
+        })
+    )
+  }, [promise])
+
+  return getState({ ...props, scriptsRegistry })
 }
 
 export class ScriptsRegistry {
@@ -44,68 +90,12 @@ export class ScriptsRegistry {
 export const ScriptsRegistryContext: React.Context<?ScriptsRegistry> =
   React.createContext(null)
 
-class ScriptLoader extends React.PureComponent<InnerProps, State> {
-  mounted: boolean = false
-  promise: Promise<void> = loadScript(this.props)
-  state: State = getState(this.props)
-
-  static propTypes = {
-    src: PropTypes.string.isRequired,
-    onLoad: PropTypes.func,
-    onError: PropTypes.func,
-    children: PropTypes.func,
+export default function ScriptLoader(props: Props): React.Node | null {
+  const state = useScript(props)
+  const { children } = props
+  if (children) {
+    const result = children({ ...state })
+    return result == null ? null : result
   }
-
-  componentDidMount() {
-    this.mounted = true
-    this.listenTo(this.promise)
-  }
-
-  componentWillUnmount() {
-    this.mounted = false
-  }
-
-  componentDidUpdate() {
-    const promise = loadScript(this.props)
-    if (this.promise !== promise) {
-      this.setState(getState(this.props))
-      this.promise = promise
-      this.listenTo(promise)
-    }
-  }
-
-  listenTo(promise: Promise<any>) {
-    const { props } = this
-    const { onLoad, onError } = props
-    promise.then(
-      () => {
-        if (!this.mounted || this.promise !== promise) return
-        if (onLoad) onLoad()
-        this.setState(getState(props))
-      },
-      (error: Error) => {
-        if (!this.mounted || this.promise !== promise) return
-        if (onError) onError(error)
-        this.setState(getState(props))
-      }
-    )
-  }
-
-  render(): React.Node {
-    const { children } = this.props
-    if (children) {
-      const result = children({ ...this.state })
-      return result == null ? null : result
-    }
-    return null
-  }
+  return null
 }
-
-const ConnectedScriptsLoader: React.ComponentType<Props> = (props: Props) => (
-  <ScriptsRegistryContext.Consumer>
-    {(scriptsRegistry) => (
-      <ScriptLoader {...props} scriptsRegistry={scriptsRegistry} />
-    )}
-  </ScriptsRegistryContext.Consumer>
-)
-export default ConnectedScriptsLoader

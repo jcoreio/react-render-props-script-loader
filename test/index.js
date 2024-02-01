@@ -4,7 +4,7 @@
 
 import { describe, it, afterEach } from 'mocha'
 import * as React from 'react'
-import { mount } from 'enzyme'
+import { cleanup, render as mount, act } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 
@@ -13,10 +13,11 @@ import loadScript from '../src/loadScript'
 
 describe('ScriptLoader', () => {
   afterEach(() => {
+    cleanup()
     document.querySelectorAll('script').forEach((script) => script.remove())
   })
   it('load works', async function () {
-    this.timeout(10000)
+    this.timeout(3000)
     const render = sinon.spy(() => 'hello')
     let onLoad, onError
     const promise = new Promise((resolve: any, reject: any) => {
@@ -24,11 +25,17 @@ describe('ScriptLoader', () => {
       onError = reject
     })
     const comp = mount(
-      <ScriptLoader src="foo" id="scriptId" onLoad={onLoad} onError={onError}>
+      <ScriptLoader
+        src="foo"
+        id="scriptId"
+        onLoad={onLoad}
+        onError={onError}
+        act={act}
+      >
         {render}
       </ScriptLoader>
     )
-    expect(comp.text()).to.equal('hello')
+    expect(comp.container.innerHTML).to.equal('hello')
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
@@ -53,11 +60,17 @@ describe('ScriptLoader', () => {
       onError = reject
     })
     const comp = mount(
-      <ScriptLoader src="bar" id="scriptId" onLoad={onLoad} onError={onError}>
+      <ScriptLoader
+        src="bar"
+        id="scriptId"
+        onLoad={onLoad}
+        onError={onError}
+        act={act}
+      >
         {render}
       </ScriptLoader>
     )
-    expect(comp.text()).to.equal('hello')
+    expect(comp.container.innerHTML).to.equal('hello')
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
@@ -85,11 +98,17 @@ describe('ScriptLoader', () => {
       onError = reject
     })
     const comp = mount(
-      <ScriptLoader src="baz" id="scriptId" onLoad={onLoad} onError={onError}>
+      <ScriptLoader
+        src="baz"
+        id="scriptId"
+        onLoad={onLoad}
+        onError={onError}
+        act={act}
+      >
         {render}
       </ScriptLoader>
     )
-    expect(comp.text()).to.equal('hello')
+    expect(comp.container.innerHTML).to.equal('hello')
     expect(render.lastCall.lastArg).to.containSubset({
       loading: false,
       loaded: true,
@@ -114,19 +133,21 @@ describe('ScriptLoader', () => {
       onError = reject
     })
     const comp = mount(
-      <ScriptLoader src="qux" id="scriptId1" onLoad={oldOnLoad}>
+      <ScriptLoader src="qux" id="scriptId1" onLoad={oldOnLoad} act={act}>
         {render}
       </ScriptLoader>
     )
-    comp
-      .setProps({
-        src: 'qlomb',
-        id: 'scriptId2',
-        onLoad,
-        onError,
-        children: render,
-      })
-      .update()
+    comp.rerender(
+      <ScriptLoader
+        src="qlomb"
+        id="scriptId2"
+        onLoad={onLoad}
+        onError={onError}
+        act={act}
+      >
+        {render}
+      </ScriptLoader>
+    )
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
@@ -157,19 +178,21 @@ describe('ScriptLoader', () => {
       onError = reject
     })
     const comp = mount(
-      <ScriptLoader src="quxage" id="scriptId1" onError={oldOnError}>
+      <ScriptLoader src="quxage" id="scriptId1" onError={oldOnError} act={act}>
         {render}
       </ScriptLoader>
     )
-    comp
-      .setProps({
-        src: 'qlombage',
-        id: 'scriptId2',
-        onLoad,
-        onError,
-        children: render,
-      })
-      .update()
+    comp.rerender(
+      <ScriptLoader
+        src="qlombage"
+        id="scriptId2"
+        onLoad={onLoad}
+        onError={onError}
+        act={act}
+      >
+        {render}
+      </ScriptLoader>
+    )
     expect(render.lastCall.lastArg).to.containSubset({
       loading: true,
       loaded: false,
@@ -195,7 +218,7 @@ describe('ScriptLoader', () => {
     const render = sinon.spy(() => 'hello')
     const oldOnLoad = sinon.spy()
     const comp = mount(
-      <ScriptLoader src="blah" id="scriptId" onLoad={oldOnLoad}>
+      <ScriptLoader src="blah" id="scriptId" onLoad={oldOnLoad} act={act}>
         {render}
       </ScriptLoader>
     )
@@ -212,7 +235,7 @@ describe('ScriptLoader', () => {
     const render = sinon.spy(() => 'hello')
     const oldOnError = sinon.spy()
     const comp = mount(
-      <ScriptLoader src="blag" id="scriptId" onError={oldOnError}>
+      <ScriptLoader src="blag" id="scriptId" onError={oldOnError} act={act}>
         {render}
       </ScriptLoader>
     )
@@ -246,7 +269,7 @@ describe(`SSR`, function () {
     const registry = new ScriptsRegistry()
     const comp = mount(
       <ScriptsRegistryContext.Provider value={registry}>
-        <ScriptLoader src="SSR" id="scriptId">
+        <ScriptLoader src="SSR" id="scriptId" act={act}>
           {render}
         </ScriptLoader>
       </ScriptsRegistryContext.Provider>
@@ -256,7 +279,7 @@ describe(`SSR`, function () {
       loaded: true,
       error: undefined,
     })
-    expect(comp.text()).to.equal('hello')
+    expect(comp.container.innerHTML).to.equal('hello')
 
     const head = mount(
       <head>
@@ -264,6 +287,6 @@ describe(`SSR`, function () {
         {registry.scriptTags()}
       </head>
     )
-    expect(head.find('script').prop('src')).to.equal('SSR')
+    expect(head.container.querySelector('script').src).to.contain('SSR')
   })
 })
